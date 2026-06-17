@@ -23,7 +23,9 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring zip exif pcntl bcmath gd intl
+RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring zip exif pcntl bcmath gd intl \
+    && pecl install redis \
+    && docker-php-ext-enable redis
 
 # Enable Apache rewrite module
 RUN a2enmod rewrite

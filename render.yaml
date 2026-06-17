@@ -13,6 +13,8 @@ envVarGroups:
         value: redis
       - key: QUEUE_CONNECTION
         value: redis
+      - key: LOG_CHANNEL
+        value: stderr
 
 services:
   - type: web
