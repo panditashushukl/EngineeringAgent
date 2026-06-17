@@ -1,9 +1,5 @@
-services:
-  - type: web
-    name: engineering-agent-web
-    env: docker
-    dockerfilePath: Dockerfile
-    plan: free
+envVarGroups:
+  - name: engineering-agent-shared-config
     envVars:
       - key: APP_ENV
         value: production
@@ -13,6 +9,19 @@ services:
         generateValue: true
       - key: DB_CONNECTION
         value: pgsql
+      - key: CACHE_STORE
+        value: redis
+      - key: QUEUE_CONNECTION
+        value: redis
+
+services:
+  - type: web
+    name: engineering-agent-web
+    env: docker
+    dockerfilePath: Dockerfile
+    plan: free
+    envVars:
+      - fromGroup: engineering-agent-shared-config
       - key: DB_HOST
         fromDatabase:
           name: engineering-agent-db
@@ -33,10 +42,6 @@ services:
         fromDatabase:
           name: engineering-agent-db
           property: password
-      - key: CACHE_STORE
-        value: redis
-      - key: QUEUE_CONNECTION
-        value: redis
       - key: REDIS_URL
         fromService:
           type: redis
@@ -53,17 +58,7 @@ services:
     dockerfilePath: Dockerfile
     plan: free
     envVars:
-      - key: APP_ENV
-        value: production
-      - key: APP_DEBUG
-        value: "false"
-      - key: APP_KEY
-        fromService:
-          type: web
-          name: engineering-agent-web
-          property: envVar:APP_KEY
-      - key: DB_CONNECTION
-        value: pgsql
+      - fromGroup: engineering-agent-shared-config
       - key: DB_HOST
         fromDatabase:
           name: engineering-agent-db
@@ -84,10 +79,6 @@ services:
         fromDatabase:
           name: engineering-agent-db
           property: password
-      - key: CACHE_STORE
-        value: redis
-      - key: QUEUE_CONNECTION
-        value: redis
       - key: REDIS_URL
         fromService:
           type: redis
