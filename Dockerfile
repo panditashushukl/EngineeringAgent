@@ -49,7 +49,7 @@ COPY . .
 COPY --from=asset-builder /app/public/build ./public/build
 
 # Install Composer dependencies
-RUN composer install --no-interaction --no-dev --optimize-autoloader --verbose
+RUN composer install --no-interaction --optimize-autoloader --verbose
 
 # Set correct permissions for storage and bootstrap/cache
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/public
