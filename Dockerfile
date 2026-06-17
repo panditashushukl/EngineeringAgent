@@ -49,6 +49,7 @@ COPY . .
 COPY --from=asset-builder /app/public/build ./public/build
 
 # Install Composer dependencies
+ENV COMPOSER_NO_DEV=0
 RUN composer install --no-interaction --optimize-autoloader --verbose
 
 # Set correct permissions for storage and bootstrap/cache
