@@ -20,4 +20,15 @@ require __DIR__.'/../vendor/autoload.php';
 /** @var Application $app */
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
-$app->handleRequest(Request::capture());
+$request = Request::capture();
+$response = $app->handle($request);
+$response->send();
+try {
+    $app->terminate($request, $response);
+} catch (\Throwable $e) {
+    try {
+        $app->make(\Illuminate\Contracts\Debug\ExceptionHandler::class)->report($e);
+    } catch (\Throwable $reportException) {
+        error_log($e->getMessage());
+    }
+}
