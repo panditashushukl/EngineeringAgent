@@ -1,3 +1,11 @@
+# Stage 1: Build Vite assets
+FROM node:20-alpine AS asset-builder
+WORKDIR /app
+COPY . .
+RUN npm install
+RUN npm run build
+
+# Stage 2: Production PHP/Apache environment
 FROM php:8.3-apache
 
 # Install system dependencies
@@ -11,11 +19,11 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libpq-dev \
     libzip-dev \
-    gnupg \
+    libicu-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring zip exif pcntl bcmath gd
+RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring zip exif pcntl bcmath gd intl
 
 # Enable Apache rewrite module
 RUN a2enmod rewrite
@@ -28,20 +36,17 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Install Node.js & NPM (needed for asset build)
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs
-
 # Set working directory
 WORKDIR /var/www/html
 
 # Copy application files
 COPY . .
 
-# Install Composer and NPM dependencies, and build assets
-RUN composer install --no-interaction --no-dev --optimize-autoloader \
-    && npm install \
-    && npm run build
+# Copy built frontend assets from asset-builder stage
+COPY --from=asset-builder /app/public/build ./public/build
+
+# Install Composer dependencies
+RUN composer install --no-interaction --no-dev --optimize-autoloader
 
 # Set correct permissions for storage and bootstrap/cache
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
