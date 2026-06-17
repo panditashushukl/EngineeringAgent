@@ -1,5 +1,8 @@
 <?php
 
+// Start output buffering to prevent premature output from causing header-already-sent errors.
+ob_start();
+
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 

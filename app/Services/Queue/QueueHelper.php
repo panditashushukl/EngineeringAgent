@@ -18,9 +18,9 @@ class QueueHelper
 
         try {
             $artisan = base_path('artisan');
-            // Execute the worker with a timeout or let it stop when empty
-            $command = "php {$artisan} queue:work --stop-when-empty > /dev/null 2>&1 &";
-            exec($command);
+            // Execute the worker with a timeout or let it stop when empty, ensuring stdin is redirected
+            $command = "php {$artisan} queue:work --stop-when-empty < /dev/null > /dev/null 2>&1 &";
+            @exec($command);
             Log::info("Background queue worker started: {$command}");
         } catch (\Throwable $e) {
             Log::error("Failed to start background queue worker: " . $e->getMessage());
