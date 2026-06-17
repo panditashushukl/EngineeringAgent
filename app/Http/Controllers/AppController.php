@@ -91,7 +91,7 @@ class AppController extends Controller
                 'repositories' => $repositories,
                 'developers' => $developers,
                 'leaderboard' => $leaderboard,
-                'integrations' => Integration::query()->latest()->limit(12)->get(),
+                'integrations' => Integration::query()->where('user_id', auth()->id())->latest()->limit(12)->get(),
                 'insights' => $insights,
                 'activity' => [
                     'labels' => $activity->keys()->values(),

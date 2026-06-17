@@ -12,7 +12,7 @@ class GeminiClient
     public function __construct()
     {
         $this->apiKey = config('services.gemini.api_key', env('GEMINI_API_KEY', ''));
-        $this->model = config('services.gemini.model', env('GEMINI_MODEL', 'gemini-2.5-pro'));
+        $this->model = \App\Models\Setting::get('gemini_model', config('services.gemini.model', 'gemini-2.5-pro'));
     }
 
     public function generate(

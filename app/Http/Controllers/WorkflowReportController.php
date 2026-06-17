@@ -103,6 +103,9 @@ class WorkflowReportController extends Controller
                 }
             }
 
+            $provider = \App\Models\Setting::get('ai_provider', config('services.ai_provider', 'gemini'));
+            $providerName = ucfirst($provider);
+
             if ($decoded && isset($decoded['executive_summary'])) {
                 // Ensure recommendations is an array
                 if (isset($decoded['recommendations']) && is_string($decoded['recommendations'])) {
@@ -120,7 +123,7 @@ class WorkflowReportController extends Controller
                 ]);
             }
             
-            throw new \Exception("Invalid JSON structure received from Ollama.");
+            throw new \Exception("Invalid JSON structure received from {$providerName}.");
 
         } catch (\Exception $e) {
             $report = WorkflowReport::create([
@@ -128,10 +131,13 @@ class WorkflowReportController extends Controller
                 'metrics_snapshot' => $metrics
             ]);
 
+            $provider = \App\Models\Setting::get('ai_provider', config('services.ai_provider', 'gemini'));
+            $providerName = ucfirst($provider);
+
             return response()->json([
                 'success' => true,
                 'report' => $report,
-                'warning' => 'Ollama query timed out or is offline. A local heuristics-based analysis report has been generated instead.'
+                'warning' => "{$providerName} query timed out or is offline. A local heuristics-based analysis report has been generated instead."
             ]);
         }
     }

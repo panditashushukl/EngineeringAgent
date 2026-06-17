@@ -10,6 +10,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (app()->environment('testing')) {
+            return;
+        }
+
         // Run the seeder exactly once during deployment migrations
         Artisan::call('db:seed', ['--force' => true]);
     }

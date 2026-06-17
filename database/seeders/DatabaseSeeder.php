@@ -33,10 +33,16 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
-        // 2. Create Integrations for this user
-        $integrations = collect(['github', 'gitlab'])->map(function ($provider) use ($user) {
+        // Create Demo User for seeded integrations so they are not pre-connected on the test user
+        $demoUser = User::factory()->create([
+            'name' => 'Demo User',
+            'email' => 'demo@example.local',
+        ]);
+
+        // 2. Create Integrations for demo user
+        $integrations = collect(['github', 'gitlab'])->map(function ($provider) use ($demoUser) {
             return Integration::factory()->create([
-                'user_id' => $user->id,
+                'user_id' => $demoUser->id,
                 'provider' => $provider,
             ]);
         });
@@ -128,11 +134,13 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
 
-            // Seed a DeveloperInsight record using Ollama with factory fallback
+            // Seed a DeveloperInsight record using active AI provider with factory fallback
             try {
                 $insightService->generate($developer);
             } catch (\Exception $e) {
-                $this->command->warn("Failed to generate AI insights via Ollama for developer {$developer->name}: " . $e->getMessage());
+                $provider = \App\Models\Setting::get('ai_provider', config('services.ai_provider', 'gemini'));
+                $providerName = ucfirst($provider);
+                $this->command->warn("Failed to generate AI insights via {$providerName} for developer {$developer->name}: " . $e->getMessage());
                 DeveloperInsight::factory()->create([
                     'developer_id' => $developer->id,
                 ]);
